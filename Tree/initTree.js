@@ -2,13 +2,49 @@ var tree={
     val:1,
     left:{
       val:2,
-      left: {},
-      right: {}
+      left: {
+        val:4,
+        left:{
+          val:5,
+          left:{},
+          right:{}
+        },
+        right:{
+          val:6,
+          left:{},
+          right:{}
+        }
+      },
+      right: {
+        val:7,
+        left:{},
+        right:{
+          val:8,
+          left:{},
+          right:{}
+        }
+      }
     },
 
     right:{
         val:3,
-        left:{},
-        right:{}
+        left:{
+          val:9,
+          left:{},
+          right:{}
+        },
+        right:{
+          val:10,
+          left:{
+            val:11,
+            left:{},
+            right:{}
+          },
+          right:{
+            val:12,
+            left:{},
+            right:{}
+          }
+        }
     }
 }
