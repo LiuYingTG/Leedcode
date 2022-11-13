@@ -382,7 +382,7 @@ class Graph{
       visited[i] = false;
     }
 
-    this._BFS(x, visited);
+    this._BFSTraverse(x, visited);
 
     // 如果遍历一边之后仍有顶点未被访问，则该图不是连通的
     for (let i = 0; i < len; i++) {
@@ -428,23 +428,59 @@ class Graph{
     return MSTree;
   }
 
+
+  // 获得图中权重之和
+  getSumOfWeight() {
+    // 当图不是连通的时候，获取权重之和没有意义
+    if (!this.isConnected()) return;
+
+    let sum = 0;
+    let vertex = this.adj;
+
+    if (!this.isDirect) {  // 如果是无向图
+      for (let i = 0; i < vertex.length - 1; i++) {
+        for (let j = i; j < vertex.length; j++) {
+          let weight = this.getEdgeWeight(vertex[i].data, vertex[j].data);
+
+          if (weight) sum += weight;
+        }
+      }
+    } else {
+      for (let i = 0; i < vertex.length; i++) {
+        for (let j = 0; j < vertex.length; j++) {
+          let weight = this.getEdgeWeight(vertex[i].data, vertex[j].data);
+
+          if (weight) sum += weight;
+        }
+      }
+    }
+
+    return sum;
+  }
+
 }
 
 
-let aovArr=['A','B','C','D','E','F']
-let aovGraph=new Graph(1)
-aovGraph.initVertex(aovArr)
-aovGraph.addEdge('A','B')
-aovGraph.addEdge('A','D')
-aovGraph.addEdge('B','E')
-aovGraph.addEdge('B','F')
-aovGraph.addEdge('C','B')
-aovGraph.addEdge('C','F')
-aovGraph.addEdge('E','A')
-aovGraph.addEdge('E','B')
-aovGraph.addEdge('E','F')
-for(let i=0;i<aovArr.length;i++){
-  aovGraph.allNeightbors(aovArr[i])
-}
-console.log(aovGraph.isAOV())
+let arr = ['A', 'B', 'C', 'D', 'E'];
+let myGraph = new Graph(0);  // 0表示无向图
+myGraph.initVertex(arr);
+
+myGraph.addEdge('A', 'B', 5);
+myGraph.addEdge('A', 'C', 7);
+myGraph.addEdge('A', 'E', 6);
+myGraph.addEdge('B', 'D', 2);
+myGraph.addEdge('B', 'E', 4);
+myGraph.addEdge('C', 'D', 4);
+myGraph.addEdge('C', 'E', 2);
+myGraph.addEdge('D', 'E', 3);
+
+let MSTree = myGraph.getPrimMST();
+
+console.log(MSTree.BFSTraverse());  // 广度优先遍历下看看
+// 输出A->B->D->E->C
+console.log(MSTree.DFSTraverse());  // 深度优先遍历下看看
+// 输出A->B->D->E->C
+console.log(MSTree.getSumOfWeight());
+// 输出12
+
 

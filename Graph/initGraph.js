@@ -401,30 +401,129 @@ class Graph {
     return result;
   }
 
+  /**
+   * 获取边(x, y)或<x, y>对应的权值
+   * @param {*} x
+   * @param {*} y
+   */
+  getEdgeWeight(x, y) {
+    let pos = this._find(x);
+
+    if (pos > -1) {
+      let curVer = this.adj[pos].firstEdge;
+
+      while (curVer) {
+        if (curVer.data === y) { return curVer.weight; }
+
+        curVer = curVer.nextEdge;
+      }
+
+      return 0;
+    }
+  }
+  // 判断当前的图是否是连通图
+  isConnected(x = this.adj[0].data) {
+    // 任选一个顶点作为起点
+    let len = this.adj.length;
+    let visited = new Array(len);
+
+    for (let i = 0; i < len; i++) {
+      visited[i] = false;
+    }
+
+    this._BFS(x, visited);
+
+    // 如果遍历一边之后仍有顶点未被访问，则该图不是连通的
+    for (let i = 0; i < len; i++) {
+      if (!visited[i]) return false;
+    }
+
+    return true;
+  }
+// 普里姆算法
+  getPrimMSTree(){
+    // 不是连通图时求最小生成树没有意义
+    if (!this.isConnected()) { return; }
+
+    let V = this.adj;  // 顶点集V
+    let Vt = [V[0]];  // 添加任意一个顶点
+    let VVt = V.filter(x => Vt.indexOf(x) === -1); // VVt = V - Vt
+    let MSTree = new Graph(this.isDirect);  // 初始化空树
+    V.forEach(x => MSTree.insertVertex(x.data));  // 图方便先将所有顶点都放入树中
+
+    while (Vt.length !== V.length) {  // 若树中不含全部顶点
+      let mVt = null;  // 当找到权值最小的边时，mVT是边的一个顶点
+      let mVVt = null;  // 当找到权值最小的边时，mV_VT是边的另一个顶点
+      let minW = Number.MAX_SAFE_INTEGER;  // 先将minW赋个极大的数值
+
+      // 在VT和V_VT中找到边中的最小权值
+      for (let i = 0; i < Vt.length; i++) {  // 从VT中取出一个顶点
+        for (let j = 0; j < VVt.length; j++) {  // 从VVt中取出一个顶点
+          let weight = this.getEdgeWeight(Vt[i].data, VVt[j].data);
+
+          if (weight && minW > weight) {
+            minW = weight;
+            mVt = Vt[i];
+            mVVt = VVt[j];
+          }
+        }
+      }
+
+      Vt.push(mVVt);
+      MSTree.addEdge(mVt.data, mVVt.data, minW);
+      VVt = V.filter(x => Vt.indexOf(x) === -1);
+    }
+
+    return MSTree;
+  } // 获得图中权重之和
+  getSumOfWeight() {
+    // 当图不是连通的时候，获取权重之和没有意义
+    if (!this.isConnected()) return;
+
+    let sum = 0;
+    let vertex = this.adj;
+
+    if (!this.isDirect) {  // 如果是无向图
+      for (let i = 0; i < vertex.length - 1; i++) {
+        for (let j = i; j < vertex.length; j++) {
+          let weight = this.getEdgeWeight(vertex[i].data, vertex[j].data);
+
+          if (weight) sum += weight;
+        }
+      }
+    } else {
+      for (let i = 0; i < vertex.length; i++) {
+        for (let j = 0; j < vertex.length; j++) {
+          let weight = this.getEdgeWeight(vertex[i].data, vertex[j].data);
+
+          if (weight) sum += weight;
+        }
+      }
+    }
+
+    return sum;
+  }
+
+
 }
-let arr = ['V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8'];
+let arr = ['A', 'B', 'C', 'D', 'E'];
 let myGraph = new Graph(0);  // 0表示无向图
 myGraph.initVertex(arr);
-// 插入边
-myGraph.addEdge('V0', 'V1');
-myGraph.addEdge('V0', 'V5');
-myGraph.addEdge('V1', 'V2');
-myGraph.addEdge('V1', 'V6');
-myGraph.addEdge('V1', 'V8');
-myGraph.addEdge('V2', 'V3');
-myGraph.addEdge('V2', 'V8');
-myGraph.addEdge('V3', 'V4');
-myGraph.addEdge('V3', 'V6');
-myGraph.addEdge('V3', 'V7');
-myGraph.addEdge('V3', 'V8');
-myGraph.addEdge('V4', 'V5');
-myGraph.addEdge('V4', 'V7');
-myGraph.addEdge('V5', 'V6');
-myGraph.addEdge('V6', 'V7');
 
-// for(let i=0; i<arr.length; i++) {
-//   myGraph.allNeightbors(arr[i]);
-// }
-for(let i=0; i<arr.length; i++) {
-  console.log(myGraph.DFSTraverse(arr[i]));
-}
+myGraph.addEdge('A', 'B', 5);
+myGraph.addEdge('A', 'C', 7);
+myGraph.addEdge('A', 'E', 6);
+myGraph.addEdge('B', 'D', 2);
+myGraph.addEdge('B', 'E', 4);
+myGraph.addEdge('C', 'D', 4);
+myGraph.addEdge('C', 'E', 2);
+myGraph.addEdge('D', 'E', 3);
+
+let MSTree = myGraph.getPrimMSTree();
+
+console.log(MSTree.BFSTraverse());  // 广度优先遍历下看看
+// 输出A->B->D->E->C
+console.log(MSTree.DFSTraverse());  // 深度优先遍历下看看
+// 输出A->B->D->E->C
+console.log(MSTree.getSumOfWeight());
+// 输出12
