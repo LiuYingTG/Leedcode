@@ -63,4 +63,4 @@ var minWindow = function (s, t) {
   }
   return res
 };
-minWindow( "ADOBECODEBANC","ABC")
+console.log(minWindow( "ADOBECODEBAANC","ABC"))
